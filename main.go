@@ -15,7 +15,14 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (r *Repository) SetupRoutes(app *fiber.App) {}
+func (r *Repository) SetupRoutes(app *fiber.App) {
+	api := app.Group("/api")
+	api.Get("/healthcheck", checkAPIHealth)
+}
+
+func checkAPIHealth(c *fiber.Ctx) error {
+	return c.Status(http.StatusOK).SendString("All good here!")
+}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -39,8 +46,5 @@ func main() {
 
 	app := fiber.New()
 	r.SetupRoutes(app)
-	app.Get("/healthcheck", func(c *fiber.Ctx) error {
-		return c.Status(http.StatusOK).SendString("All good here!")
-	})
 	log.Fatal(app.Listen(":5000"))
 }
