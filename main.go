@@ -26,6 +26,22 @@ type Book struct {
 func (r *Repository) SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	api.Get("/healthcheck", checkAPIHealth)
+	api.Post("/books", r.AddBook)
+}
+
+func (r *Repository) AddBook(c *fiber.Ctx) error {
+	book := Book{}
+	err := c.BodyParser(&book)
+	if err != nil {
+		c.Status(http.StatusUnprocessableEntity).JSON(&fiber.Map{"message": "Request failed."})
+	}
+	err = r.DB.Create(&book).Error
+	if err != nil {
+		c.Status(http.StatusBadRequest).JSON(&fiber.Map{"message": "Could not add book."})
+		return err
+	}
+	c.Status(http.StatusOK).JSON(&fiber.Map{"message": "Book was added successfully!"})
+	return nil
 }
 
 func checkAPIHealth(c *fiber.Ctx) error {
