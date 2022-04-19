@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"github.com/viveksingh-01/go-fiber-postgres-rest-api/database"
+	"github.com/viveksingh-01/go-fiber-postgres-rest-api/models"
 	"gorm.io/gorm"
 )
 
@@ -49,6 +51,11 @@ func main() {
 		log.Fatal("Couldn't connect to the Database.")
 	} else {
 		fmt.Println("Connected to the Database successfully!")
+	}
+
+	err = models.MigrateBooks(db)
+	if err != nil {
+		log.Fatal("Couldn't migrate DB")
 	}
 
 	r := Repository {
