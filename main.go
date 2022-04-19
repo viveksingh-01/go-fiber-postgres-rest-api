@@ -27,6 +27,7 @@ func (r *Repository) SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	api.Get("/healthcheck", checkAPIHealth)
 	api.Post("/books", r.AddBook)
+	api.Get("/books", r.GetBooks)
 }
 
 func (r *Repository) AddBook(c *fiber.Ctx) error {
@@ -34,13 +35,29 @@ func (r *Repository) AddBook(c *fiber.Ctx) error {
 	err := c.BodyParser(&book)
 	if err != nil {
 		c.Status(http.StatusUnprocessableEntity).JSON(&fiber.Map{"message": "Request failed."})
+		return err
 	}
 	err = r.DB.Create(&book).Error
 	if err != nil {
 		c.Status(http.StatusBadRequest).JSON(&fiber.Map{"message": "Could not add book."})
 		return err
 	}
-	c.Status(http.StatusOK).JSON(&fiber.Map{"message": "Book was added successfully!"})
+	c.Status(http.StatusCreated).JSON(&fiber.Map{"message": "Book was added successfully!"})
+	return nil
+}
+
+func (r *Repository) GetBooks(c *fiber.Ctx) error {
+	books := &[]models.Books{}
+	err := r.DB.Find(books).Error
+	if err != nil {
+		c.Status(http.StatusBadRequest).JSON(&fiber.Map{"message": "Couldn't fetch the books from the database."})
+		return err
+	} else {
+		c.Status(http.StatusOK).JSON(&fiber.Map{
+			"message": "Books were fetched successfully!",
+			"data": books,
+		})
+	}
 	return nil
 }
 
@@ -64,14 +81,14 @@ func main() {
 	}
 	db, err := database.Connect(config)
 	if err != nil {
-		log.Fatal("Couldn't connect to the Database.")
+		log.Fatal("Couldn't connect to the database.")
 	} else {
-		fmt.Println("Connected to the Database successfully!")
+		fmt.Println("Connected to the database successfully!")
 	}
 
 	err = models.MigrateBooks(db)
 	if err != nil {
-		log.Fatal("Couldn't migrate DB")
+		log.Fatal("Couldn't migrate Books to the database.")
 	}
 
 	r := Repository {
