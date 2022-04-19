@@ -37,14 +37,19 @@ func main() {
 	}
 
 	config := &database.Config{
-		Host: os.Getenv("DB_HOST"),
-		Port: os.Getenv("DB_PORT"),
-		DBName: os.Getenv("DB_NAME"),
-		User: os.Getenv("DB_USER"),
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		DBName:   os.Getenv("DB_NAME"),
+		User:     os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PASSWORD"),
-		SSLMode: os.Getenv("DB_SSLMODE"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
 	}
 	db, err := database.Connect(config)
+	if err != nil {
+		log.Fatal("Couldn't connect to the Database.")
+	} else {
+		fmt.Println("Connected to the Database successfully!")
+	}
 
 	r := Repository {
 		DB: db,
