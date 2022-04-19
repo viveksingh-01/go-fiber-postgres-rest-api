@@ -15,6 +15,12 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+type Book struct {
+	Title     string `json:"title"`
+	Author    string `json:"author"`
+	Publisher string `json:"publisher"`
+}
+
 func (r *Repository) SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	api.Get("/healthcheck", checkAPIHealth)
